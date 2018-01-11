@@ -40,7 +40,7 @@ class Audio_Server(QThread):
         conn, addr = self.sock.accept()
         print("remote AUDIO client success connected...")
         data = "".encode("utf-8")
-        payload_size = struct.calcsize("L")
+        payloadSize = struct.calcsize("L")
         self.stream = self.p.open(format=FORMAT,
                                   channels=CHANNELS,
                                   rate=RATE,
@@ -48,16 +48,16 @@ class Audio_Server(QThread):
                                   frames_per_buffer = CHUNK
                                   )
         while True:
-            while len(data) < payload_size:
+            while len(data) < payloadSize:
                 data += conn.recv(81920)
-            packed_size = data[:payload_size]
-            data = data[payload_size:]
-            msg_size = struct.unpack("L", packed_size)[0]
-            while len(data) < msg_size:
+            recvSize = data[:payloadSize]
+            data = data[payloadSize:]
+            unpackedDataSize = struct.unpack("L", recvSize)[0]
+            while len(data) < unpackedDataSize:
                 data += conn.recv(81920)
-            frame_data = data[:msg_size]
-            data = data[msg_size:]
-            frames = pickle.loads(frame_data)
+            frameData = data[:unpackedDataSize]
+            data = data[unpackedDataSize:]
+            frames = pickle.loads(frameData)
             for frame in frames:
                 self.stream.write(frame, CHUNK)
 

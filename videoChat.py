@@ -11,9 +11,9 @@ import beautyFace
 from PyQt5.QtCore import QObject, QThread
 
 class Video_Server(QThread):
+
     def __init__(self, port) :
         QThread.__init__(self)
-        # self.setDaemon(True)
         self.ADDR = ('', port)
         self.sock = socket(AF_INET ,SOCK_STREAM)
 
@@ -31,27 +31,28 @@ class Video_Server(QThread):
         conn, addr = self.sock.accept()
         print("remote VEDIO client success connected...")
         data = "".encode("utf-8")
-        payload_size = struct.calcsize("L")
+        payloadSize = struct.calcsize("L")
         cv2.namedWindow('Remote', cv2.WINDOW_NORMAL)
         while True:
-            while len(data) < payload_size:
+            while len(data) < payloadSize:
                 data += conn.recv(81920)
-            packed_size = data[:payload_size]
-            data = data[payload_size:]
-            msg_size = struct.unpack("L", packed_size)[0]
-            while len(data) < msg_size:
+            recvSize = data[:payloadSize]
+            data = data[payloadSize:]
+            unpackedDataSize = struct.unpack("L", recvSize)[0]
+            while len(data) < unpackedDataSize:
                 data += conn.recv(81920)
-            zframe_data = data[:msg_size]
-            data = data[msg_size:]
-            frame_data = zlib.decompress(zframe_data)
-            frame = pickle.loads(frame_data)
+            zframeData = data[:unpackedDataSize]
+            data = data[unpackedDataSize:]
+            frameData = zlib.decompress(zframeData)
+            frame = pickle.loads(frameData)
             cv2.imshow('Remote', frame)
             if cv2.waitKey(1) & 0xFF == 27:
                 cv2.destroyWindow('Remote')
                 break
 
 class Video_Client(QThread):
-    def __init__(self ,ip, port, level):
+    
+    def __init__(self, ip, port, level):
         QThread.__init__(self)
         self.ADDR = (ip, port)
         if level == 0:

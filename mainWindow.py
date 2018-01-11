@@ -19,7 +19,9 @@ class MainWindow(QWidget):
         self.QualityLable = QLabel('画质')
 
         self.IPEdit = QLineEdit()
+        self.IPEdit.setInputMask('000.000.000.000;_')
         self.PortEdit = QLineEdit()
+        self.PortEdit.setPlaceholderText('18818')
         self.QualityInfo = ''
 
         self.grid = QGridLayout()
@@ -50,6 +52,10 @@ class MainWindow(QWidget):
         self.setLayout(self.grid)
 
         self.setWindowTitle('FaceChat')
+        with open('style.qss') as file:
+            str = file.readlines()
+            str =''.join(str).strip('\n')
+        self.setStyleSheet(str)
 
         self.show()
 
@@ -66,14 +72,17 @@ class MainWindow(QWidget):
                 self.QualityInfo = ''
 
     def handleButton(self):
-        if (self.IPEdit.text() == '' or self.PortEdit.text() == ''):
-            QMessageBox.information(self,'警告', '请输入IP和端口')
+        if (self.IPEdit.text() == ''):
+            QMessageBox.information(self, '警告', '请输入IP和端口')
         else:
             self.startChat()
 
     def startChat(self):
         ip = self.IPEdit.text()
-        port = int(self.PortEdit.text())
+        try:
+            port = int(self.PortEdit.text())
+        except:
+            port = 18818
         qual = int(self.QualityInfo)
         vclient = Video_Client(ip, port, qual)
         vserver = Video_Server(port)
